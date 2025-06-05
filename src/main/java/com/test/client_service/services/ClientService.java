@@ -24,16 +24,18 @@ public class ClientService {
 
 
     public ClientResponse findByNumberDocument(ClientRequest request) {
-        if (!(request.getTypeDocument().equals("C") || request.getTypeDocument().equals("P"))) {
+        if (!"C".equals(request.getTypeDocument()) && !"P".equals(request.getTypeDocument())) {
             throw new ClientNotFoundException("Tipo de documento no válido");
         }
 
-        return mockDatabase.stream()
-                .filter(client -> client.getTypeDocument().equals(request.getTypeDocument()) &&
-                        client.getNumberDocument().equals(request.getNumberDocument()))
-                .findFirst()
-                .map(this::mapToClientResponse)
-                .orElseThrow(() -> new ClientNotFoundException("Cliente no encontrado"));
+        for (MockClient client : mockDatabase) {
+            if (client.getTypeDocument().equals(request.getTypeDocument()) &&
+                    client.getNumberDocument().equals(request.getNumberDocument())) {
+                return mapToClientResponse(client);
+            }
+        }
+
+        throw new ClientNotFoundException("Cliente no encontrado");
     }
 
     private MockClient createMockClient(String firstName, String secondName, String lastName, String secondLastName,
